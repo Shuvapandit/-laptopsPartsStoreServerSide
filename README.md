@@ -7,3 +7,5 @@
 ## Project Features
 * This is a laptop parts store clientside Website.
 * User can buy their products using login
+* This is clientside website backend part.
+## Project  Functionalites.
