@@ -13,6 +13,21 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.eys2p.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: 'UnAuthorized access' });
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: 'Forbidden access' })
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
 async function run(){
  try{
  await client.connect();
@@ -37,6 +52,28 @@ app.post('/purchase', async (req, res) => {
   const purchase = req.body;
   const result = await purchaseCollection.insertOne(purchase);
   res.send(result);
+})
+/* dashboadrd */
+app.get('/purchase', verifyJWT ,async (req, res) => {
+  const customer = req.query.customer;
+  const decodedEmail = req.decoded.email;
+  if (customer === decodedEmail) {
+    const query={customer:customer};
+    const result = await purchaseCollection.find(query).toArray();
+    res.send(result);
+  }
+  else {
+    return res.status(403).send({ message: 'forbidden access' });
+  }
+
+  app.get('/purchase/:id', verifyJWT, async(req, res) =>{
+    const id = req.params.id;
+    const query = {_id: ObjectId(id)};
+    const result = await purchaseCollection.find(query).toArray();
+    res.send(result);
+  })
+
+  
 })
  /* admin */
  app.put('/user/:email', async (req, res) => {
