@@ -9,3 +9,6 @@
 * User can buy their products using login
 * This is clientside website backend part.
 ## Project  Functionalites.
+* We use React as a Library .
+* We use Tailwind and Daisy UI as a css framework for Design our website.
+* We use firebase for login/Register validation.
